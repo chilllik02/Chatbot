@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleApp8;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -8,51 +9,17 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 class Program
 {
-    public static InlineKeyboardMarkup help;
-    public static InlineKeyboardMarkup start;
+
     static ITelegramBotClient botClient;
+
+    public static List<string> task;
+
+    public Class1 keyboard = new Class1();
+
     static async Task Main(string[] args)
     {
-
-        help = new InlineKeyboardMarkup(new[]
-        {
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    text: "Список доступных команд",
-                    callbackData: "commands"
-                    )
-            },
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    text: "Что я умею?👹",
-                    callbackData: "12345"
-                    )
-            }
-        });
-        start = new InlineKeyboardMarkup(new[]
-        {
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    text: "TIME⌚",
-                    callbackData: "time"
-                    )
-            },
-            new[]
-            {
-                InlineKeyboardButton.WithCallbackData(
-                    text: "HELP⚠️",
-                    callbackData: "help"
-                    )
-            }
-        });
-
-
-
-
-
+        Class1.init();
+        task = new List<string>();
         string token = "7808802453:AAEGMa8kl4n5XDqxvAAFa05cqED1FO_z53U";
         botClient = new TelegramBotClient(token);
 
@@ -82,60 +49,81 @@ class Program
         if(update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
         {
             saveTOFile(update.Message.Chat.Id);
-            if (update.Message != null && update.Message.Text == "/Time" || update.Message.Text == "/time")
-
+            switch(update.Message.Text)
             {
-                Console.WriteLine("Получено сообщение: " + update.Message.Text);
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Текущее время и дата: " + DateTime.Now.ToString());
-            }
-            else if (update.Message != null && update.Message.Text == "/Help" || update.Message.Text == "/help")
-            {
-                Console.WriteLine("Получено сообщение: " + update.Message.Text);
-
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Информация по использованию бота", replyMarkup: help);
-            }
-            else
-            {
-                Console.WriteLine("Получено сообщение: " + update.Message.Text);
-
-                await botClient.SendTextMessageAsync(update.Message.Chat.Id, $"Привет {update.Message.Chat.FirstName}, я бот помощник! ", replyMarkup: start);
+                case "/help":
+                    Console.WriteLine("Получено сообщение: " + update.Message.Text);
+                    await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Информация по использованию бота", replyMarkup: Class1.help);
+                    break;
+                case "/start":
+                    Console.WriteLine("Получено сообщение: " + update.Message.Text);
+                    await botClient.SendTextMessageAsync(
+                        update.Message.Chat.Id, Strings.start,
+                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                        replyMarkup: Class1.start);
+                    break;
+                case "/add":
+                    Console.WriteLine("Получено сообщение: " + update.Message.Text);
+                    if (update.Message != null)
+                    {
+                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, "напишите задачу в чат!");
+                        task.Add(update.Message.Text);
+                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Задача добавлена!");
+                    }
+                    else
+                    {
+                        await botClient.SendTextMessageAsync(update.Message.Chat.Id, "Введите текст!");
+                    }
+                    break;
+                case "/list":
+                    
+                    break;
+                case "/done":
+                    break;
+                case "/delete":
+                    break;
+                default:
+                    break;
             }
         }
 
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
         {
             string buttonCommand = update.CallbackQuery.Data;
-            if (buttonCommand == "commands")
+            switch(buttonCommand)
             {
-                Console.WriteLine("Получено сообщение: " + update.CallbackQuery.Message.ToString());
-
-                await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, $"Вы запросили список комманд!");
-            }
-            if (buttonCommand == "12345")
-            {
-                Console.WriteLine("Получено сообщение: " + update.CallbackQuery.Message.ToString());
-
-                await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, $"Вы запросили, что я умею!");
+                case "commands":
+                    Console.WriteLine("Получено сообщение: " + update.CallbackQuery.Message.ToString());
+                    await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, Strings.help);
+                    break;
+                default:
+                    break;
             }
         }
         if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
         {
             string buttonCommand2 = update.CallbackQuery.Data;
-            if (buttonCommand2 == "time")
+            switch(buttonCommand2)
             {
-                Console.WriteLine("Получено сообщение: " + update.CallbackQuery.Message.ToString());
-                await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Текущее время и дата: " + DateTime.Now.ToString());
-            }
-            if (buttonCommand2 == "help")
-            {
-                Console.WriteLine("Получено сообщение: " + update.CallbackQuery.ToString());
-                await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Информация по использованию бота", replyMarkup: help);
+                case "setzadach":
+                    break;
+                case "help":
+                    Console.WriteLine("Получено сообщение: " + update.CallbackQuery.ToString());
+                    await botClient.SendTextMessageAsync(update.CallbackQuery.Message.Chat.Id, "Информация по использованию бота", replyMarkup: Class1.help);
+                    break;
+                case "showtask":
+                    break;
+                case "dedline":
+                    break;
+                case "otmetka":
+                    break;
+                case "deletezadacha":
+                    break;
+                default:
+                    break;
+
             }
         }
-
-
-
-
     }
 
     public static void saveTOFile(long chatid)
